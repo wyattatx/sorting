@@ -34,6 +34,8 @@ Sorting page
 
 	<div id='content'> 
 	<h1 class = 'top'> Sorting tool </h1>
+
+
 <form>
   Array size: <input type="number" name="size" value='<?php echo(isset($_REQUEST['size']) ? $_REQUEST['size'] : '');?>'><br>
   <p><input type="submit" name="sort" value="Insertion"></p>
@@ -48,6 +50,9 @@ Sorting page
 error_reporting(E_ALL);
 ini_set('display_errors',1);
 
+$comparisons = 0;
+$movements = 0;
+$Otime = "";
 $arr = array();
 
 if(isset($_REQUEST['size'])) {
@@ -104,9 +109,9 @@ $stop = microtime_float();
 	</tr>
 	<tr>
 		<td> <?php echo "random" ?> </td>
-		<td> <?php //echo $comparisons; ?> </td>
-		<td> <?php //echo $movements; ?> </td>
-		<td> <?php //echo $Otime; ?> </td>
+		<td> <?php echo $comparisons; ?> </td>
+		<td> <?php echo $movements; ?> </td>
+		<td> <?php echo $Otime; ?> </td>
 		<td> <?php echo $stop - $start; ?> </td>
 	</tr>
 </table>
@@ -117,6 +122,8 @@ $stop = microtime_float();
 }
 
 function radix($arr,$size) {
+	global $comparisons,$movements,$Otime;
+	$Otime = "O(nk)";
 	/*for ($shift = 31; $shift > -1; $shift--)
 	{
 		$j = 0;
@@ -124,19 +131,16 @@ function radix($arr,$size) {
 		for ($i = 0; $i < $size; $i++)
 		{
 			$move = ($arr[$i] << $shift) >= 0;
-
 			if ($shift == 0 ? !$move : $move)
 				$arr[$i - $j] = $arr[$i];
 			else
 				$temp[$j++] = $arr[$i];
 		}
-
 		for ($i = 0; $i < $j; $i++)
 		{
 			$arr[($size - $j) + $i] = $temp[$i];
 		}
 	}
-
 	$temp = null;
 	return $arr;*/
 	
@@ -176,15 +180,19 @@ function merge_sort($arr){
 }
 
 function merge($left, $right){
+	global $comparisons,$movements,$Otime;
+	$Otime = "O(n(logn))";
 	$res = array();
 	while (count($left) > 0 && count($right) > 0){
 		if($left[0] > $right[0]){
+			$comparisons++;
 			$res[] = $right[0];
 			$right = array_slice($right , 1);
 		}else{
 			$res[] = $left[0];
 			$left = array_slice($left, 1);
 		}
+		$movements++;
 	}
 	while (count($left) > 0){
 		$res[] = $left[0];
@@ -197,9 +205,11 @@ function merge($left, $right){
 	return $res;
 }
 
-function quick($arr)
- {
-	 $loe = $gt = array();
+function quick($arr){
+	
+	global $comparisons,$movements,$Otime;
+	$Otime = "O(n(logn))";
+	$loe = $gt = array();
 	if(count($arr) < 2)
 	{
 		return $arr;
@@ -211,24 +221,30 @@ function quick($arr)
 		if($val <= $pivot)
 		{
 			$loe[] = $val;
+			$movements++;
 		}elseif ($val > $pivot)
 		{
 			$gt[] = $val;
 		}
+		$comparisons++;
 	}
 	return array_merge(quick($loe),array($pivot_key=>$pivot),quick($gt));
 	
 }
 
 function sel($arr){
+	global $comparisons,$movements,$Otime;
+	$Otime = "O(n^2)";
 	for($i=0; $i<$_REQUEST['size']-1; $i++) {
 	$min = $i;
 	for($j=$i+1; $j<$_REQUEST['size']; $j++) {
 		if ($arr[$j]<$arr[$min]) {
 			$min = $j;
+			$comparisons++;
 		}
 	}
     $arr = swap_positions($arr, $i, $min);
+	$movements++;
 }
 return $arr;
 }
@@ -241,15 +257,18 @@ function swap_positions($data1, $left, $right) {
 }
 
 function ins($arr){
+	global $comparisons,$movements,$Otime;
+	$Otime = "O(n^2)";
 	for($i=0;$i<$_REQUEST['size'];$i++){
 		$val = $arr[$i];
 		$j = $i-1;
 		while($j>=0 && $arr[$j] > $val){
+			$comparisons++;
 			$arr[$j+1] = $arr[$j];
 			$j--;
 		}
 		$arr[$j+1] = $val;
-		//echo $val . "<->" . $j . "<br>";
+		$movements++;
 	}
 	return $arr;
 }
