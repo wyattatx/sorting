@@ -6,7 +6,7 @@ Sorting page
 </title>
 <style>
  table {
-   border-collapse: collapse;
+   border-collapse: collapse;`````
    border: 1px solid black;
  }
  th, td {
@@ -21,12 +21,31 @@ Sorting page
 	 display: inline-block; vertical-align: top;
 	 margin: 20px;
  }
+ 
+ h2{display: inline-block; vertical-align: top;
+	margin-right: 500px; margin-top: 0px; margin-bottom: 0px;}
+ 
  form{text-align: center;}
  
- .top {text-align: center; margin: 0 auto 1em;}
+ .top {text-align: center; margin-top: 0px; margin-bottom: 0px;}
  
  body {background-color: blue; margin: 0;}
  #content {background-color: white; margin: 0 auto; padding: 1em; max-width: 800px;}
+ 
+ .button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+
 </style>
 
 </head>
@@ -34,15 +53,18 @@ Sorting page
 
 	<div id='content'> 
 	<h1 class = 'top'> Sorting tool </h1>
+	<h2 style="font-size:16px"><i>tip: for demonstration purposes, array size 10 or less works best due to the formatting of the webpage. however, this program supports an array of any size</i></h2>
 
 
 <form>
   Array size: <input type="number" name="size" value='<?php echo(isset($_REQUEST['size']) ? $_REQUEST['size'] : '');?>'><br>
-  <p><input type="submit" name="sort" value="Insertion"></p>
-  <p><input type="submit" name="sort" value="Selection"></p>
-  <p><input type="submit" name="sort" value="Quick"></p>
-  <p><input type="submit" name="sort" value="Merge"></p>
-  <p><input type="submit" name="sort" value="Radix"></p>
+	<p><input type="submit" class="button" name="sort" value="Insertion">
+	<input type="submit" class="button" name="sort" value="Selection"></p>
+	<p><input type="submit" class="button" name="sort" value="Quick">
+	<input type="submit" class="button" name="sort" value="Merge"></p>
+	<p><input type="submit" class="button" name="sort" value="Radix">
+	<input type="submit" class="button" name="sort" value="Bubble"></p>
+	<p><input type="submit" class="button" name="sort" value="Shell"></p>
 </form>
 
 <?php
@@ -92,6 +114,13 @@ switch (strtolower($_REQUEST['sort'])) {
 	case 'radix':
 		renderTable(radix($arr,$_REQUEST['size']));
 		break;
+	case 'bubble':
+		renderTable(bubble($arr));
+		break;
+	case 'shell':
+		renderTable(shell($arr));
+	default:
+	break;
 }
 $stop = microtime_float();
 ?>
@@ -119,6 +148,56 @@ $stop = microtime_float();
 <?php
 }else{
 	echo "Please choose a size and sort";
+}
+
+function shell($arr)
+{
+	global $comparisons,$movements,$Otime;
+	$Otime = 'O(n(log(n))^2)';
+	$x = round(count($arr)/2);
+	while($x > 0)
+	{
+		for($i = $x; $i < count($arr);$i++){
+			
+			$temp = $arr[$i];
+			$j = $i;
+			while($j >= $x && $arr[$j-$x] > $temp)
+			{
+				$comparisons++;
+				$arr[$j] = $arr[$j - $x];
+				$j -= $x;
+				$movements++;
+			}
+			$arr[$j] = $temp;
+		}
+		$x = round($x/2.2);
+		$comparisons++;
+	}
+	return $arr;
+}
+
+function bubble($arr){
+	global $comparisons,$movements,$Otime;
+	$Otime = "O(n^2)";
+	$temp = 0;
+	do
+	{
+		$swapped = false;
+		for( $i = 0, $c = count( $arr ) - 1; $i < $c; $i++ )
+		{
+			if( $arr[$i] > $arr[$i + 1] )
+			{
+				$comparisons++;
+				list( $arr[$i + 1], $arr[$i] ) =
+						array( $arr[$i], $arr[$i + 1] );
+				$swapped = true;
+			}
+			$movements++;
+		}
+	}
+	while( $swapped );
+return $arr;
+	
 }
 
 function radix($arr,$size) {
@@ -158,8 +237,10 @@ function radix($arr,$size) {
  
     foreach ($temp as $key => $val) {
 		if ($val == 1) {
+			$comparisons++;
 			$output[] = $key; 
 		} else {
+			$comparisons++;
 			while ($val--) {
 				$output[] = $key;
 			}
@@ -221,12 +302,12 @@ function quick($arr){
 		if($val <= $pivot)
 		{
 			$loe[] = $val;
-			$movements++;
+			$comparisons++;
 		}elseif ($val > $pivot)
 		{
 			$gt[] = $val;
 		}
-		$comparisons++;
+		$movements++;
 	}
 	return array_merge(quick($loe),array($pivot_key=>$pivot),quick($gt));
 	
@@ -240,11 +321,11 @@ function sel($arr){
 	for($j=$i+1; $j<$_REQUEST['size']; $j++) {
 		if ($arr[$j]<$arr[$min]) {
 			$min = $j;
-			$comparisons++;
+			$movements++;
 		}
 	}
     $arr = swap_positions($arr, $i, $min);
-	$movements++;
+	$comparisons++;
 }
 return $arr;
 }
@@ -263,12 +344,12 @@ function ins($arr){
 		$val = $arr[$i];
 		$j = $i-1;
 		while($j>=0 && $arr[$j] > $val){
-			$comparisons++;
+			$movements++;
 			$arr[$j+1] = $arr[$j];
 			$j--;
 		}
 		$arr[$j+1] = $val;
-		$movements++;
+		$comparisons++;
 	}
 	return $arr;
 }
@@ -289,3 +370,4 @@ function renderTable($arr) {
 </div>
 </body>
 </html>
+
